@@ -12,7 +12,7 @@
       <thead>
         <tr>
           <th scope="col">No</th>
-          <th scope="col">Nama</th>
+          <th scope="col">Nama Company</th>
           <th scope="col">Email</th>
           <th scope="col">Logo</th>
           <th scope="col">Website</th>
@@ -26,15 +26,22 @@
           <td>{{$data->nama}}</td>
           <td>{{$data->email}}</td>
           <td>
-            <a href="/storage/app/company/{{$data->logo}}">asd</a>
+            @php
+                $path = Storage::url('company/'.$data->logo);
+                $file = Storage::get('/public/company/'.$data->logo);
+            @endphp
+            <img src="{{$file}}" alt="">
+            <h4>{{$exists = Storage::disk('company')->exists($data->logo)}}</h4>
           </td>
           <td>{{$data->website}}</td>
           <td>
               <a href="/admin/company/edit/{{$data->id}}" class="btn btn-success">Edit</a>
               <a href="/admin/company/delete/{{$data->id}}" class="btn btn-danger">Delete</a>
+              <a href="/admin/company/download_pdf/{{$data->id}}" class="btn btn-secondary">Print</a>
           </td>
         </tr>
         @endforeach
       </tbody>
   </table>
+  <span>Logo ada dan tersimpan di dalam storage, ketika di cek ada tapi tidak bisa muncul</span>
   @endsection

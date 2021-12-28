@@ -8,6 +8,9 @@ use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Storage;
 use Validator;
 use Ramsey\Uuid\Uuid;
+use PDF;
+use App\Employee;
+use Illuminate\Http\File;
 
 
 class CompanyController extends Controller
@@ -54,7 +57,12 @@ class CompanyController extends Controller
             return back()->withInput();
         }
         $logo = $request->logo;
-        Storage::disk('company')->put($logo->getClientOriginalName(), 'Contents');
+        Storage::disk('company')->put($logo->getClientOriginalName(), file_get_contents($logo));
+        // $path = Storage::putFile(
+        //     'public/company',
+        //     new File('/path/to/logo'),
+        //     $logo,
+        // );
 
 
         $company = new Company;
@@ -115,7 +123,7 @@ class CompanyController extends Controller
             return back()->withInput();
         }
         $logo = $request->logo;
-        Storage::disk('company')->put($logo->getClientOriginalName(), 'Contents');
+        Storage::disk('company')->put($logo->getClientOriginalName(), 'Contents','public');
         $company = Company::find($id);
         $company->nama = $request->nama;
         $company->email = $request->email;
@@ -139,5 +147,12 @@ class CompanyController extends Controller
         $delete->delete();
         toast('Delete Successfull','success');
         return redirect()->back();
+    }
+    public function downloadPdf($id)
+    {
+        $employees = Employee::all();
+        // dd($employee);
+        $pdf = PDF::loadview('admin.employee.employee',['employees'=>$employees]);
+    	return $pdf->download('employee_report');
     }
 }

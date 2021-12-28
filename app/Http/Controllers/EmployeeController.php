@@ -9,6 +9,8 @@ use RealRashid\SweetAlert\Facades\Alert;
 use Validator;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\DB;
+use App\Imports\EmployeeImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeController extends Controller
 {
@@ -23,7 +25,7 @@ class EmployeeController extends Controller
                         ->leftJoin('companies',function($join){
                             $join->on('companies.id','=','employees.company');
                         })
-                        ->select('*','companies.nama as company_name','employees.nama as employee_name')
+                        ->select('*','companies.nama as company_name','employees.nama as employee_name','employees.id as id_employee')
                         ->paginate(5);
 
         // dd($employees);
@@ -92,7 +94,10 @@ class EmployeeController extends Controller
      */
     public function edit($id,Employee $employee)
     {
-        //
+        $employee = Employee::find($id);
+        $companies = Company::all();
+        // dd($company);
+        return view('admin.employee.editEmployee',compact('employee','companies'));
     }
 
     /**
@@ -102,9 +107,27 @@ class EmployeeController extends Controller
      * @param  \App\Employee  $employee
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Employee $employee)
+    public function update($id,Request $request, Employee $employee)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            "nama" => ['required'],
+            "company" => ['required'],
+            "email" => ['required','email'],
+        ]);
+
+        if($validator->fails()){
+            $request->flash();
+            toast($validator->messages()->all()[0], 'error');
+            return back()->withInput();
+        }
+        $employee = Employee::find($id);
+        $employee->nama = $request->nama;
+        $employee->company = $request->company;
+        $employee->email = $request->email;
+        $employee->save();
+        
+        toast('Update Successfull', 'success');
+        return redirect()->route('admin.employee');
     }
 
     /**
@@ -119,5 +142,9 @@ class EmployeeController extends Controller
         $delete->delete();
         toast('Delete Successfull','success');
         return redirect()->back();
+    }
+    public function excel(){
+        Excel::import(new EmployeeImport,request()->file('file'));
+        return back();
     }
 }
