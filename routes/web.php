@@ -20,3 +20,20 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::middleware('role:admin')->group(function(){
+    // companies
+    Route::get('/admin/companies','CompanyController@index')->name('admin.company');
+    Route::get('/admin/company/add','CompanyController@create')->name('company.add');
+    Route::post('/admin/company/add','CompanyController@store');
+    Route::get('/admin/company/delete/{id}','CompanyController@destroy');
+    Route::get('/admin/company/edit/{id}','CompanyController@edit')->name('company.edit');
+    Route::post('/admin/company/edit/{id}','CompanyController@update');
+    // employees
+    Route::get('/admin/employees','EmployeeController@index')->name('admin.employee');
+    Route::get('/admin/employee/add','EmployeeController@create')->name('employee.add');
+    Route::post('/admin/employee/add','EmployeeController@store');
+    Route::get('/admin/employee/delete/{id}','EmployeeController@destroy');
+    Route::get('/admin/employee/edit/{id}','EmployeeController@edit')->name('employee.edit');
+    Route::post('/admin/employee/edit/{id}','EmployeeController@update');
+});
+
